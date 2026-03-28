@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login/Register Mining Clicker</title>
+<style>
+body { font-family: Arial; background:#0f172a; color:white; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; }
+.container { background:#1e293b; padding:20px; border-radius:10px; text-align:center; }
+input { padding:8px; margin:5px; width:200px; border-radius:5px; border:none; }
+button { padding:8px 15px; margin:5px; border:none; border-radius:5px; background:#4caf50; color:white; cursor:pointer; }
+button:hover { background:#45a049; }
+h2 { margin:10px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+<h2>Register</h2>
+<input id="regNama" placeholder="Nama">
+<input id="regPass" placeholder="Password" type="password">
+<button onclick="register()">Register</button>
+
+<h2>Login</h2>
+<input id="logNama" placeholder="Nama">
+<input id="logPass" placeholder="Password" type="password">
+<button onclick="login()">Login</button>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylVBoltNAt9fx14Be7qby3NhQUsNwjqf1o-3nxHTTAKAZdx9JW8LPkQaP3GZDD-zmxtQ/exec";
+
+async function getUsers(){
+    const res = await fetch(`${SCRIPT_URL}?action=get`);
+    const data = await res.json();
+    return data;
+}
+
+async function register(){
+    const nama = document.getElementById("regNama").value.trim();
+    const pass = document.getElementById("regPass").value.trim();
+    if(!nama || !pass){ alert("Isi semua!"); return; }
+
+    const users = await getUsers();
+    if(users.some(u=>u.Nama===nama)){ alert("Nama sudah dipakai!"); return; }
+
+    await fetch(`${SCRIPT_URL}?action=add&nama=${encodeURIComponent(nama)}&password=${encodeURIComponent(pass)}&money=0`);
+    alert("Register berhasil! Silahkan login.");
+    document.getElementById("regNama").value="";
+    document.getElementById("regPass").value="";
+}
+
+async function login(){
+    const nama = document.getElementById("logNama").value.trim();
+    const pass = document.getElementById("logPass").value.trim();
+    if(!nama || !pass){ alert("Isi semua!"); return; }
+
+    const users = await getUsers();
+    const user = users.find(u=>u.Nama===nama && u.Password===pass);
+    if(user){
+        localStorage.setItem("userMiningClicker", JSON.stringify(user));
+        alert(`Login berhasil! Money: ${user.Money}`);
+        // Nanti bisa redirect ke main.html
+    } else {
+        alert("Nama/Password salah!");
+    }
+}
+</script>
+</body>
+</html>

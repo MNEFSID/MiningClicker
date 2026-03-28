@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mining Clicker</title>
+<style>
+body { font-family: Arial; background:#0f172a; color:white; text-align:center; margin:0; }
+h1, h2 { margin:10px; }
+#rock { width:120px; height:120px; background:gray; margin:30px auto; border-radius:15px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold; transition:0.1s; }
+#rock:active { transform:scale(0.9); }
+button { padding:12px; margin:10px; border:none; border-radius:10px; cursor:pointer; }
+#gacha { background:gold; }
+</style>
+</head>
+<body>
+
+<h1>💰 Money: <span id="coin">0</span></h1>
+<h2>⛏️ Power: <span id="power">1</span></h2>
+
+<div id="rock">HP: <span id="hp">10</span></div>
+
+<button id="gacha">🎰 Gacha (20 Money)</button>
+
+<h3 id="result">Hasil: -</h3>
+<button onclick="logout()">Logout</button>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylVBoltNAt9fx14Be7qby3NhQUsNwjqf1o-3nxHTTAKAZdx9JW8LPkQaP3GZDD-zmxtQ/exec";
+
+let user = JSON.parse(localStorage.getItem("userMiningClicker"));
+if(!user){ alert("Login dulu!"); window.location.href="index.html"; }
+
+let coin = parseInt(user.Money) || 0;
+let power = 1;
+let rockHP = 10;
+
+const coinText = document.getElementById("coin");
+const powerText = document.getElementById("power");
+const hpText = document.getElementById("hp");
+const resultText = document.getElementById("result");
+
+update();
+
+document.getElementById("rock").onclick = () => {
+  rockHP -= power;
+  if(rockHP <=0){
+    coin +=10;
+    rockHP = 10;
+    resultText.innerText="Batu hancur! +10 Money";
+    updateCoinSheet();
+  }
+  update();
+};
+
+document.getElementById("gacha").onclick = () => {
+  if(coin < 20){ resultText.innerText="Money kurang!"; return; }
+  coin -=20;
+  let rand = Math.random();
+  if(rand<0.6){ power+=1; resultText.innerText="Common ⛏️ (+1 power)"; }
+  else if(rand<0.9){ power+=3; resultText.innerText="Rare ⚒️ (+3 power)"; }
+  else { power+=8; resultText.innerText="MYTHIC 🔥 (+8 power)"; }
+  updateCoinSheet();
+  update();
+};
+
+function update(){ coinText.innerText=coin; powerText.innerText=power; hpText.innerText=rockHP; }
+
+function updateCoinSheet(){
+  fetch(`${SCRIPT_URL}?action=update&nama=${encodeURIComponent(user.Nama)}&money=${coin}`);
+  localStorage.setItem("userMiningClicker", JSON.stringify({...user, Money:coin}));
+}
+
+function logout(){
+  localStorage.removeItem("userMiningClicker");
+  window.location.href="index.html";
+}
+</script>
+
+</body>
+</html>
