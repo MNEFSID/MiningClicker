@@ -1,0 +1,2 @@
+# MiningClicker
+Game Mining Sederhana
